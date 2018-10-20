@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>My game</title>
+	<link rel="stylesheet" type="text/css" href="css/index.css">
+</head>
+<body>
+	<div id="MainBlock">
+		<center>
+			<canvas id="MyCanvas">Sorry, not supported...</canvas>
+		</center>
+	</div>
+</body>
+<script>
+	var canvas = document.getElementById("MyCanvas");
+	var ctx = canvas.getContext("2d");
+
+	canvas.width = 360;
+	canvas.height = 240;
+
+	ctx.font = '5px arial';
+	ctx.fillStyle = "white";
+
+	var gradient=ctx.createLinearGradient(0,0,canvas.width,0);
+
+	var boardImage = new Image();
+	boardImage.src = "img/Board.png";
+
+	var block_1 = new Image();
+	block_1.src = "img/blue.png";
+
+	var block_2 = new Image();
+	block_2.src = "img/green.png";
+
+	var block_3 = new Image();
+	block_3.src = "img/red.png";
+
+	var block_4 = new Image();
+	block_4.src = "img/purple.png";
+
+	var block_5 = new Image();
+	block_5.src = "img/yellow.png";
+
+	
+
+  //////////////////////////////////////
+	
+	var n = 8, m = 16;		//const
+	var x = 0, y = 0;
+	var chet = 0;
+	var score = 0;
+	var startX = 8, startY = 1;  // начальные координаты фигур
+
+	var newFigure = true;
+	var counter = 0;
+	var removeY = 0;
+	var fon = [];
+	for (var i = 0; i < m+2; i++){
+										// объявление и заполнение двумерного массива цветами
+    	fon[i] = [];
+    	for (var j = 0; j < n+1; j++){
+        	fon[i][j] = block_2;
+		}
+	}
+
+	var cell = [];
+	for (var i = 0; i < m+2; i++){
+										// объявление и заполнение двумерного массива нулями
+    	cell[i] = [];
+    	for (var j = 0; j < n+1; j++){
+        	cell[i][j] = 0;
+		}
+	}
+
+	for (var i =0; i < n+1; i++){
+
+		cell [0][i] = 2;			// заполнение двух краев двойками
+		cell [m+1][i] = 2;
+	}
+
+	for (var i =1; i < m+1; i++){
+
+		cell [i][n] = 2;		// заполнение низкого края двойками
+	}
+
+	// cell[9][2] = 1;  // проверка работоспособности доски
+
+</script>
+
+<script src="js/index.js"></script>
+<script src="js/map.js"></script>
+<script src="js/block.js"></script>
+<script src="js/board.js"></script>
+<script src="js/figures.js"></script>
+
+<script>
+
+	document.addEventListener("keydown", keyEvent, true);
+
+	function keyEvent(e) {
+		if(e.keyCode == 32) {
+
+			Figures.angle += Math.PI/2;
+			if (Figures.angle == Math.PI*2){Figures.angle = 0;}
+
+			if (Figures.checkLine()) {
+
+				Figures.angle -= Math.PI/2;
+				if (Figures.angle == -Math.PI/2){Figures.angle = Math.PI*3/2;}
+			}
+		}
+		else if(e.keyCode == 37) {
+			Figures.B0_x --;
+			if (Figures.checkLine()) {
+
+				Figures.B0_x ++;
+				Figures.coordinate();
+				Figures.rotation();
+			}
+		}
+		else if(e.keyCode == 39) {
+			Figures.B0_x ++;
+			if (Figures.checkLine()) {
+
+				Figures.B0_x --;
+				Figures.coordinate();
+				Figures.rotation();
+			}
+		}
+		else if(e.keyCode == 40) {
+			Figures.B0_y ++;
+			if (Figures.checkLine()) {
+
+				Figures.B0_y --;
+				Figures.coordinate();
+				Figures.rotation();
+			}
+		}
+	}
+
+	setInterval(function() {
+
+		if (newFigure) {
+
+			newFigure = false;
+			Figures.numberFigure = Figures.getRandom(1,8);
+			Figures.B0_x = startX;
+			Figures.B0_y = startY;
+		}
+
+		Figures.coordinate(); 
+		Figures.rotation();
+
+		Index.clearCanvas();
+		GameMap.draw();
+		Board.draw();
+		Figures.draw();
+
+		gradient.addColorStop("0","magenta");
+gradient.addColorStop("0.5","blue");
+gradient.addColorStop("1.0","red");
+// Fill with gradient
+ctx.fillStyle=gradient;
+		ctx.fillText(('Score:  '), 15, 30);
+		ctx.fillText((score), 45, 30);
+
+
+		counter ++;
+		if (counter == 10) {
+			counter = 0;
+
+			Figures.B0_y ++;
+	
+			if (Figures.checkLine()) {
+
+				if (Figures.B0_y < 3){
+
+					newFigure = true;
+					Board.clean();
+					Board.draw();
+					alert("Game Over!");
+					score = 0;
+				}
+
+				else {
+
+					chet ++;
+
+					newFigure = true;
+					Figures.B0_y --;
+					Figures.coordinate();
+					Figures.rotation();
+					Figures.putFigure();
+
+					removeY = n-1;
+					while (removeY > 0){
+
+						Figures.removeLine(); 
+						removeY--;
+					}
+				}
+
+			}
+
+		}
+		
+
+	}, 100);
+</script>
+</html>
